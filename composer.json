@@ -1,0 +1,22 @@
+{
+    "name": "gnews-io/gnews-php-client",
+    "description": "A PHP client for the GNews.io API",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Gnews\\GnewsPhp\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Jules",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "guzzlehttp/guzzle": "^7.0",
+        "ext-json": "*"
+    }
+}
