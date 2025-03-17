@@ -1,10 +1,10 @@
 <?php
 
-namespace Gnews\GnewsPhp;
+namespace GNews\GNewsPhp;
 
 use Exception;
 
-class GnewsException extends Exception
+class GNewsException extends Exception
 {
     // Custom exception for GNews API errors
 }

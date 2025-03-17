@@ -5,7 +5,8 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Gnews\\GnewsPhp\\": "src/"
+            "GNews\\GNewsPhp\\": "src",
+            "GNews\\GNewsPhp\\Tests\\": "tests"
         }
     },
     "authors": [
@@ -14,6 +15,9 @@
             "role": "Developer"
         }
     ],
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
     "require": {
         "php": "^8.0",
         "guzzlehttp/guzzle": "^7.0",

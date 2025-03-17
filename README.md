@@ -1,6 +1,10 @@
-# GNews PHP Client
+# GNews.io PHP Client
 
 A PHP client for the GNews.io API, designed to be simple and easy to use.
+
+## Documentation
+
+- [GNews.io API Documentation](https://gnews.io/docs/v4#introduction)
 
 ## Installation
 
@@ -13,17 +17,6 @@ composer require gnews-io/gnews-php-client
 ### Quick Examples
 
 ```php
-// Using static methods
-$searchResults = Gnews::search('bitcoin', [
-    'apikey' => 'YOUR_API_KEY'
-]);
-
-$headlines = Gnews::headlines([
-    'apikey' => 'YOUR_API_KEY', 
-    'category' => 'technology'
-]);
-
-// Using instance methods
 $gnews = new Gnews('YOUR_API_KEY');
 
 $searchResults = $gnews->searchArticles('bitcoin');
@@ -37,27 +30,19 @@ $headlines = $gnews->getHeadlines(['category' => 'technology']);
 Search for articles with a specific query.
 
 ```php
-// Static method
-$results = Gnews::search('bitcoin', [
-    'apikey' => 'YOUR_API_KEY',
+$gnews = new Gnews('YOUR_API_KEY');
+
+$results = $gnews->search('bitcoin', [
     'lang' => 'en',
     'country' => 'us',
     'max' => 10,
+    'in' => 'title,description',  // Where to search (title,description,content)
+    'nullable' => null, // Specify the attributes that you allow to return null values
     'sortby' => 'publishedAt',  // or 'relevance'
     'from' => '2025-01-01T00:00:00Z',
     'to' => '2025-01-31T23:59:59Z',
-    'in' => 'title,description',  // Where to search (title,description,content)
-    'nullable' => true,
-    'expand' => true,
-    'image' => true
-]);
-
-// Instance method
-$gnews = new Gnews('YOUR_API_KEY');
-$results = $gnews->searchArticles('bitcoin', [
-    'lang' => 'en',
-    'country' => 'us',
-    // other parameters...
+    'page' => 1, // Paid plan only
+    'expand' => 'content', // Paid plan only : get the full content of the article
 ]);
 ```
 
@@ -66,55 +51,68 @@ $results = $gnews->searchArticles('bitcoin', [
 Get top headlines, optionally filtered by category.
 
 ```php
-// Static method
-$headlines = Gnews::headlines([
-    'apikey' => 'YOUR_API_KEY',
+$gnews = new Gnews('YOUR_API_KEY');
+
+$headlines = $gnews->headlines([
     'category' => 'technology',  // Optional: general, world, nation, business, technology, entertainment, sports, science, health
     'lang' => 'en',
     'country' => 'us',
     'max' => 10,
-    'nullable' => true,
-    'expand' => true,
-    'image' => true,
-    'topic' => 'artificial intelligence'  // Optional - topic to filter headlines
+    'nullable' => '', // Specify the attributes that you allow to return null values
+    'from' => '2025-01-01T00:00:00Z',
+    'to' => '2025-01-31T23:59:59Z',
+    'q' => 'bitcoin',
+    'page' => 1, // Paid plan only
+    'expand' => 'content', // Paid plan only : get the full content of the article
 ]);
 
-// Instance method
-$gnews = new Gnews('YOUR_API_KEY');
-$headlines = $gnews->getHeadlines([
-    'category' => 'business',
-    // other parameters...
-]);
 ```
 
 ## Parameters
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `apikey` | string | Your GNews API key |
-| `lang` | string | Language of the articles (two-letter ISO 639-1 code) |
-| `country` | string | Country of the articles (two-letter ISO 3166-1 code) |
-| `max` | integer | Maximum number of articles to return (1-100) |
-| `category` | string | Category of the articles (headlines only) |
-| `sortby` | string | Sorting method: 'publishedAt' or 'relevance' (search only) |
-| `from` | string | Start date for search (ISO 8601 format, search only) |
-| `to` | string | End date for search (ISO 8601 format, search only) |
-| `in` | string | Where to search: 'title', 'description', 'content' or a combination (search only) |
-| `nullable` | boolean | Whether to include null values in the query params |
-| `expand` | boolean | Whether to show expanded article content |
-| `image` | boolean | Whether to include only articles with images |
-| `topic` | string | Topic to filter headlines by (headlines only) |
+| Parameter  | Type    | Description                                                                       |
+|------------|---------|-----------------------------------------------------------------------------------|
+| `lang`     | string  | Language of the articles (two-letter ISO 639-1 code)                              |
+| `country`  | string  | Country of the articles (two-letter ISO 3166-1 code)                              |
+| `max`      | integer | Maximum number of articles to return (1-100)                                      |
+| `category` | string  | Category of the articles (headlines only)                                         |
+| `sortby`   | string  | Sorting method: 'publishedAt' or 'relevance' (search only)                        |
+| `from`     | string  | Start date for search (ISO 8601 format, search only)                              |
+| `to`       | string  | End date for search (ISO 8601 format, search only)                                |
+| `in`       | string  | Where to search: 'title', 'description', 'content' or a combination (search only) |
+| `nullable` | boolean | Whether to include null values in the query params                                |
+| `page`     | int     | Control the pagination of the results                                             |
+| `expand`   | boolean | Whether to get full article content (paid plan only)                              |
+
+## Response Format
+
+All API methods return promises that resolve to objects with the following structure:
+
+```php
+{
+    "totalArticles": 123,
+    "articles": [
+        {
+            "title": "Article title",
+            "description": "Article description",
+            "content": "Article content...",
+            "url": "https://article-source.com/article",
+            "image": "https://article-source.com/image.jpg",
+            "publishedAt": "2025-01-01T12:00:00Z",
+            "source": {
+                "name": "Source Name",
+                "url": "https://source.com"
+            },
+        }
+        // ... more articles
+    ]
+}
+```
 
 ## Error Handling
 
-```php
-use Gnews\GnewsPhp\Exception\GnewsException;
-
-try {
-    $results = Gnews::search('bitcoin', [
-        'apikey' => 'YOUR_API_KEY'
-    ]);
-} catch (GnewsException $e) {
-    echo "Error: " . $e->getMessage();
-}
-```
+The library throws errors in the following cases:
+- Missing API key during initialization
+- Network errors
+- API request timeouts
+- API error responses
