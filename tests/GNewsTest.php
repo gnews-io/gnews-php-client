@@ -2,6 +2,7 @@
 
 namespace GNews\GNewsPhp\Tests;
 
+use GNews\GNewsPhp\Article;
 use GNews\GNewsPhp\GNews;
 use GNews\GNewsPhp\GNewsException;
 use GuzzleHttp\Client;
@@ -52,7 +53,7 @@ class GNewsTest extends TestCase
      */
     public function testSearchArticles(): void
     {
-        $expectedResponse = [
+        $responseData = [
             'totalArticles' => 1,
             'articles' => [
                 ['title' => 'Test Article']
@@ -60,12 +61,15 @@ class GNewsTest extends TestCase
         ];
 
         $this->mockHandler->append(
-            new Response(200, [], json_encode($expectedResponse, JSON_THROW_ON_ERROR))
+            new Response(200, [], json_encode($responseData, JSON_THROW_ON_ERROR))
         );
 
         $result = $this->gnews->search('test query', ['lang' => 'fr']);
 
-        $this->assertEquals($expectedResponse, $result);
+        $this->assertEquals(1, $result->getTotalArticles());
+        $this->assertCount(1, $result);
+        $this->assertInstanceOf(Article::class, $result[0]);
+        $this->assertEquals('Test Article', $result[0]->title);
     }
 
     /**
@@ -74,7 +78,7 @@ class GNewsTest extends TestCase
      */
     public function testGetHeadlines(): void
     {
-        $expectedResponse = [
+        $responseData = [
             'totalArticles' => 2,
             'articles' => [
                 ['title' => 'Headline 1'],
@@ -83,12 +87,16 @@ class GNewsTest extends TestCase
         ];
 
         $this->mockHandler->append(
-            new Response(200, [], json_encode($expectedResponse, JSON_THROW_ON_ERROR))
+            new Response(200, [], json_encode($responseData, JSON_THROW_ON_ERROR))
         );
 
-        $result = $this->gnews->getHeadlines(['country' => 'fr']);
+        $result = $this->gnews->headlines(['country' => 'fr']);
 
-        $this->assertEquals($expectedResponse, $result);
+        $this->assertEquals(2, $result->getTotalArticles());
+        $this->assertCount(2, $result);
+        $this->assertInstanceOf(Article::class, $result[0]);
+        $this->assertEquals('Headline 1', $result[0]->title);
+        $this->assertEquals('Headline 2', $result[1]->title);
     }
 
     /**
@@ -107,7 +115,7 @@ class GNewsTest extends TestCase
         $this->expectException(GNewsException::class);
         $this->expectExceptionMessage('API rate limit exceeded');
 
-        $this->gnews->getHeadlines();
+        $this->gnews->headlines();
     }
 
     /**
@@ -126,15 +134,14 @@ class GNewsTest extends TestCase
 
         $result = $gnews->search('php programming', ['lang' => 'en', 'max' => 3]);
 
-        $this->assertArrayHasKey('totalArticles', $result);
-        $this->assertArrayHasKey('articles', $result);
-        $this->assertIsArray($result['articles']);
+        $this->assertIsInt($result->getTotalArticles());
 
-        if (!empty($result['articles'])) {
-            $article = $result['articles'][0];
-            $this->assertArrayHasKey('title', $article);
-            $this->assertArrayHasKey('description', $article);
-            $this->assertArrayHasKey('url', $article);
+        if (count($result) > 0) {
+            $article = $result[0];
+            $this->assertInstanceOf(Article::class, $article);
+            $this->assertNotEmpty($article->getTitle());
+            $this->assertIsString($article->getDescription());
+            $this->assertIsString($article->getUrl());
         }
     }
 
@@ -151,17 +158,16 @@ class GNewsTest extends TestCase
 
         $gnews = new GNews($apiKey);
 
-        $result = $gnews->getHeadlines(['country' => 'fr', 'max' => 3]);
+        $result = $gnews->headlines(['country' => 'fr', 'max' => 3]);
 
-        $this->assertArrayHasKey('totalArticles', $result);
-        $this->assertArrayHasKey('articles', $result);
-        $this->assertIsArray($result['articles']);
+        $this->assertIsInt($result->getTotalArticles());
 
-        if (!empty($result['articles'])) {
-            $article = $result['articles'][0];
-            $this->assertArrayHasKey('title', $article);
-            $this->assertArrayHasKey('description', $article);
-            $this->assertArrayHasKey('url', $article);
+        if (count($result) > 0) {
+            $article = $result[0];
+            $this->assertInstanceOf(Article::class, $article);
+            $this->assertNotEmpty($article->getTitle());
+            $this->assertIsString($article->getDescription());
+            $this->assertIsString($article->getUrl());
         }
     }
 }

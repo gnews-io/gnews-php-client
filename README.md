@@ -21,6 +21,12 @@ $gnews = new Gnews('YOUR_API_KEY');
 
 $searchResults = $gnews->searchArticles('bitcoin');
 $headlines = $gnews->getHeadlines(['category' => 'technology']);
+
+foreach ($searchResults as $article) {
+    echo $article->getTitle() . "\n";
+    echo $article->getSourceName() . "\n";
+    echo $article->getUrl() . "\n";
+}
 ```
 
 ## API Methods
@@ -88,26 +94,29 @@ $headlines = $gnews->headlines([
 
 All API methods return promises that resolve to objects with the following structure:
 
-```php
-{
-    "totalArticles": 123,
-    "articles": [
-        {
-            "title": "Article title",
-            "description": "Article description",
-            "content": "Article content...",
-            "url": "https://article-source.com/article",
-            "image": "https://article-source.com/image.jpg",
-            "publishedAt": "2025-01-01T12:00:00Z",
-            "source": {
-                "name": "Source Name",
-                "url": "https://source.com"
-            },
-        }
-        // ... more articles
-    ]
-}
-```
+### ArticleCollection
+
+| Method               | Description                                      |
+|----------------------|--------------------------------------------------|
+| `getTotalArticles()` | Returns the total number of available articles   |
+| `getArticles()`      | Returns an array of `Article` objects            |
+| `count()`            | Returns the number of articles in the collection |
+| Array access         | You can access articles with `$results[0]`       |
+| Iteration            | You can use `foreach($results as $article)`      |
+
+### Article
+
+| Method             | Description                                                                |
+|--------------------|----------------------------------------------------------------------------|
+| `getTitle()`       | Get the article title (also accessible via `->title`)                      |
+| `getDescription()` | Get the article description (also accessible via `->description`)          |
+| `getContent()`     | Get the article content (also accessible via `->content`)                  |
+| `getUrl()`         | Get the article URL (also accessible via `->url`)                          |
+| `getImage()`       | Get the article image URL (also accessible via `->image`)                  |
+| `getPublishedAt()` | Get the publication date (also accessible via `->publishedAt`)             |
+| `getSource()`      | Get the complete source information array (also accessible via `->source`) |
+| `getSourceName()`  | Get the source name (also accessible via `->source['name']`)               |
+| `getSourceUrl()`   | Get the source URL (also accessible via `->source['url']`)                 |
 
 ## Error Handling
 

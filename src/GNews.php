@@ -58,29 +58,31 @@ class GNews
      *
      * @param string $query Search query
      * @param array $params Additional parameters
-     * @return array Search results
+     * @return ArticleCollection Search results
      * @throws GNewsException If the API request fails
      */
-    public function search(string $query, array $params = []): array
+    public function search(string $query, array $params = []): ArticleCollection
     {
         $requestParams = $this->prepareParams($params);
         $requestParams['q'] = $query;
 
-        return $this->makeRequest('/search', $requestParams);
+        $response = $this->makeRequest('/search', $requestParams);
+        return new ArticleCollection($response);
     }
 
     /**
      * Get top headlines.
      *
      * @param array $params Additional parameters
-     * @return array Headlines
+     * @return ArticleCollection Headlines
      * @throws GNewsException If the API request fails
      */
-    public function getHeadlines(array $params = []): array
+    public function headlines(array $params = []): ArticleCollection
     {
         $requestParams = $this->prepareParams($params);
 
-        return $this->makeRequest('/top-headlines', $requestParams);
+        $response = $this->makeRequest('/top-headlines', $requestParams);
+        return new ArticleCollection($response);
     }
 
     /**
